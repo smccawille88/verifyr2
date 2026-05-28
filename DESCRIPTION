@@ -29,6 +29,8 @@ Suggests:
     pkgload,
     pdftools,
     purrr,
+    readxl,
+    rmarkdown,
     shinyjs,
     shinyFiles,
     shinytest2,
