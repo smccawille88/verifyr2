@@ -23,7 +23,8 @@
 #'
 #' @include BinaryFileComparator.R
 #' @include TxtFileComparator.R
-#'
+#' @include XlsxFileComparator.R
+#' 
 #' @export
 #'
 create_comparator <- function(file1, file2) {
