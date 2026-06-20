@@ -103,6 +103,10 @@ check_pdftools_available <- function() {
   requireNamespace("pdftools", quietly = TRUE)
 }
 
+check_readxl_available <- function() {
+  requireNamespace("readxl", quietly = TRUE)
+}
+
 #' Config.R
 #'
 #' Class for manging the library configuration options. Creates the default
@@ -291,6 +295,16 @@ Config <- R6::R6Class(
             desc    = pdf_details_desc
           )
         ),
+        xlsx = list(
+          title = "Excel comparison (summary)",
+          details = list(
+            title = "Process Excel detailed comparison",
+            options = c("yes", "no"),
+            default = "yes",
+            reload  = TRUE,
+            desc    = "Whether to use readxl for detailed Excel sheet comparison."
+          )
+        ),
         details = list(
           title = "Details comparison",
           mode = list(
@@ -328,6 +342,16 @@ Config <- R6::R6Class(
           default = "no",
           reload  = TRUE,
           desc    = pdf_details_desc
+        )
+      }
+
+      if (!check_readxl_available()) {
+        schema[["xlsx"]][["details"]] <- list(
+          title   = "Process Excel details (missing readxl library)",
+          options = c("no"),
+          default = "no",
+          reload  = TRUE,
+          desc    = "Whether to use readxl for detailed Excel sheet comparison."
         )
       }
 
