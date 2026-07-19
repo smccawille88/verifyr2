@@ -69,3 +69,29 @@ test_that(paste(
   expect_equal(result$type, "text")
   expect_equal(typeof(result$contents), "S4")
 })
+
+################################################################################
+# Details comparison - with readxl package missing
+################################################################################
+
+test_that(paste(
+  "Returns 'Xlsx details comparison disabled.' ",
+  "when readxl library is not available"
+), {
+  file1 <- testthat::test_path(base, "base.xlsx")
+  file2 <- testthat::test_path(base, "modified.xlsx")
+
+  # mock the readxl available method to return false to replicate situation
+  # that readxl library is not installed.
+  local_mocked_bindings(
+    check_readxl_available = function() FALSE
+  )
+
+  config_local <- Config$new(FALSE)
+
+  comparator <- create_comparator(file1, file2)
+  result     <- comparator$vrf_details(config = config_local)[[1]]
+
+  expect_equal(result$type, "text")
+  expect_equal(result$contents, "Xlsx details comparison disabled.")
+})
