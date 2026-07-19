@@ -103,3 +103,20 @@ test_that(paste(
     "Xlsx details comparison disabled."
   ))
 })
+
+################################################################################
+# Old binary Excel format (.xls) routing
+################################################################################
+
+test_that(paste(
+  "Old .xls files are handled by the XlsxFileComparator"
+), {
+  skip_if_not_installed("readxl")
+
+  file1 <- readxl::readxl_example("clippy.xls")
+
+  comparator <- create_comparator(file1, file1)
+
+  expect_s3_class(comparator, "XlsxFileComparator")
+  expect_equal(comparator$vrf_summary(config = config), "No differences.")
+})
