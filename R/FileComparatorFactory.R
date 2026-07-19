@@ -44,6 +44,11 @@ create_comparator <- function(file1, file2) {
     file_extension <- "Img"
   }
 
+  # the old binary Excel format is handled by the same comparator as xlsx
+  if (file_extension %in% list("Xls")) {
+    file_extension <- "Xlsx"
+  }
+
   # construct the comparator name
   comparator_name <- paste0(file_extension, "FileComparator")
 
