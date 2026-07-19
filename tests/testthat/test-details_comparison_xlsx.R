@@ -95,3 +95,63 @@ test_that(paste(
   expect_equal(result$type, "text")
   expect_equal(result$contents, "Xlsx details comparison disabled.")
 })
+
+################################################################################
+# Sheet / row / column annotation and header-row detection
+################################################################################
+
+test_that(paste(
+  "Flattened contents annotate each cell with its column name",
+  "so differences indicate sheet, row and column"
+), {
+  file1 <- testthat::test_path(base, "base.xlsx")
+
+  comparator <- create_comparator(file1, file1)
+  contents   <- comparator$vrf_contents(file1, config, omit = NULL)[[1]]
+
+  # a data row carries the sheet marker, a row number and Column=Value cells
+  data_rows <- grep("\\] row ", contents, value = TRUE)
+  expect_true(length(data_rows) > 0)
+  expect_true(any(grepl("=", data_rows)))
+})
+
+test_that(paste(
+  "A sheet with a header row is not flagged as headerless"
+), {
+  file1 <- testthat::test_path(base, "base.xlsx")
+
+  comparator <- create_comparator(file1, file1)
+  contents   <- comparator$vrf_contents(file1, config, omit = NULL)[[1]]
+
+  expect_false(any(grepl("no header row detected", contents)))
+})
+
+test_that(paste(
+  "A sheet whose first row is numeric is detected as headerless"
+), {
+  file1 <- testthat::test_path(base, "no_header.xlsx")
+  skip_if(!file.exists(file1), "headerless fixture not available")
+
+  comparator <- create_comparator(file1, file1)
+  contents   <- comparator$vrf_contents(file1, config, omit = NULL)[[1]]
+
+  expect_true(any(grepl("no header row detected", contents)))
+})
+
+test_that(paste(
+  "xlsx.header config overrides the header-row detection"
+), {
+  file1 <- testthat::test_path(base, "base.xlsx")
+
+  # force no header
+  cfg_no <- Config$new(FALSE)
+  cfg_no$set("xlsx.header", "no")
+  ct_no  <- create_comparator(file1, file1)$vrf_contents(file1, cfg_no, NULL)[[1]]
+  expect_true(any(grepl("no header row detected", ct_no)))
+
+  # force header
+  cfg_yes <- Config$new(FALSE)
+  cfg_yes$set("xlsx.header", "yes")
+  ct_yes  <- create_comparator(file1, file1)$vrf_contents(file1, cfg_yes, NULL)[[1]]
+  expect_false(any(grepl("no header row detected", ct_yes)))
+})
