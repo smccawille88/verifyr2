@@ -31,7 +31,14 @@ create_comparator <- function(file1, file2) {
     return(BinaryFileComparator$new(file1 = file1, file2 = file2))
   }
 
-  file_extension  <- tools::toTitleCase(tools::file_ext(file1))
+  # capitalize the first letter of the extension to match the comparator class
+  # naming convention. tools::toTitleCase is not used here because it leaves
+  # some extensions (e.g. "xlsx") untouched, which would break the lookup.
+  file_extension <- tools::file_ext(file1)
+  file_extension <- paste0(
+    toupper(substring(file_extension, 1, 1)),
+    substring(file_extension, 2)
+  )
 
   if (file_extension %in% list("Jpg", "Jpeg", "Png")) {
     file_extension <- "Img"
