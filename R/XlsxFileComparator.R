@@ -4,8 +4,6 @@
 #' This comparator contains the custom handling for reading Excel file
 #' contents for comparison.
 #'
-#' @import readxl
-#'
 #' @include TxtFileComparator.R
 #'
 #' @examples
@@ -30,6 +28,7 @@ XlsxFileComparator <- R6::R6Class(
   "XlsxFileComparator",
   inherit = TxtFileComparator,
   public = list(
+
     #' @description
     #' Method for getting the single file contents for the comparison. The
     #' method returns the file contents in two separate vectors inside a list.
@@ -39,8 +38,7 @@ XlsxFileComparator <- R6::R6Class(
     #' and shouldn't be called directly by the user.
     #'
     #' For XlsxFileComparator, each sheet is read and rows are converted to
-    #' tab-separated strings for text-based comparison. An empty row is added
-    #' after each sheet to make the sheet boundaries easier to spot.
+    #' tab-separated strings for text-based comparison.
     #'
     #' @param file   file for which to get the contents
     #' @param config configuration values
@@ -48,8 +46,17 @@ XlsxFileComparator <- R6::R6Class(
     #'
     vrf_contents = function(file, config, omit) {
       self$vrf_open_debug("Xlsx::vrf_contents", config)
+
+      if ("no" == super$vrf_option_value(config, "xlsx.details")) {
+        result <- super$vrf_contents(file, config, omit)
+
+        self$vrf_close_debug()
+        return(result)
+      }
+
       sheets   <- readxl::excel_sheets(file)
       contents <- character(0)
+
       for (sheet in sheets) {
         data <- readxl::read_excel(
           file,
@@ -57,23 +64,41 @@ XlsxFileComparator <- R6::R6Class(
           col_names = TRUE,
           col_types = "text"
         )
+
         # Add sheet header
         contents <- c(contents, paste0("[Sheet: ", sheet, "]"))
+
         if (nrow(data) > 0) {
           # Include column headers
           contents <- c(contents, paste(names(data), collapse = "\t"))
+
           # Convert each row to a tab-separated string
           rows <- apply(data, 1, function(r) {
             paste(ifelse(is.na(r), "", r), collapse = "\t")
           })
           contents <- c(contents, rows)
         }
-        # Add empty row after each sheet for readability
-        contents <- c(contents, "")
       }
+
       result <- self$vrf_contents_inner(contents, config, omit)
+
       self$vrf_close_debug()
       result
+    },
+
+    #' @description
+    #' Inherited method for indicating whether detailed comparison is available
+    #' with the current comparator. Returns an empty string if the comparator
+    #' is supported, otherwise a string that will be concatenated with the
+    #' summary string.
+    #'
+    #' @param config configuration values
+    #'
+    vrf_details_supported = function(config) {
+      if ("no" == super$vrf_option_value(config, "xlsx.details")) {
+        return("Xlsx details comparison disabled.")
+      }
+      super$vrf_details_supported(config)
     }
   )
 )
