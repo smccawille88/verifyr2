@@ -306,15 +306,13 @@ Config <- R6::R6Class(
           ),
           header = list(
             title   = "Header row handling",
-            options = c("auto", "yes", "no"),
-            default = "auto",
+            options = c("yes", "no"),
+            default = "yes",
             reload  = TRUE,
             desc    = paste0(
               "Whether the first row of each sheet is treated as a column ",
-              "header. 'auto' detects it automatically (the first row is only ",
-              "treated as data when every cell in it is numeric); 'yes' always ",
-              "treats the first row as a header; 'no' never does and uses ",
-              "positional column names instead."
+              "header. 'yes' treats the first row as a header; 'no' treats ",
+              "every row as data and uses positional column names instead."
             )
           )
         ),
