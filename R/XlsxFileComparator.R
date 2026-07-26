@@ -42,9 +42,10 @@ XlsxFileComparator <- R6::R6Class(
     #' header row is present, each cell is written as \code{Column=Value} so
     #' that any detected difference clearly indicates the sheet, the row and
     #' the column it originates from. Whether the first row is treated as a
-    #' header is detected automatically (see the private \code{has_header_row}
-    #' helper); sheets without a header row fall back to positional column
-    #' names and are flagged in the sheet marker.
+    #' header is controlled by the \code{xlsx.header} configuration option:
+    #' \code{"yes"} (default) treats it as a header, \code{"no"} treats every
+    #' row as data and uses positional column names instead, flagging the
+    #' sheet marker accordingly.
     #'
     #' @param file   file for which to get the contents
     #' @param config configuration values
@@ -63,23 +64,22 @@ XlsxFileComparator <- R6::R6Class(
       sheets   <- readxl::excel_sheets(file)
       contents <- character(0)
 
+      # whether the first row of each sheet is treated as a header is
+      # controlled by config ("yes"/"no"). Fetched once as it does not change
+      # between sheets.
+      has_header <-
+        !identical(super$vrf_option_value(config, "xlsx.header"), "no")
+
       for (sheet in sheets) {
-        # Read the sheet as-is (no assumed header) so the header row can be
-        # detected explicitly.
+        # Read the sheet without assuming a header. .name_repair = "minimal"
+        # avoids the noisy "New names" messages readxl prints for the unnamed
+        # columns.
         raw <- readxl::read_excel(
           file,
-          sheet     = sheet,
-          col_names = FALSE,
-          col_types = "text"
-        )
-
-        # header handling can be forced via config; "auto" uses the heuristic
-        header_opt <- super$vrf_option_value(config, "xlsx.header")
-        has_header <- switch(
-          header_opt,
-          "yes" = TRUE,
-          "no"  = FALSE,
-          private$has_header_row(raw)
+          sheet        = sheet,
+          col_names    = FALSE,
+          col_types    = "text",
+          .name_repair = "minimal"
         )
 
         if (has_header && nrow(raw) > 0) {
@@ -96,11 +96,11 @@ XlsxFileComparator <- R6::R6Class(
           body <- raw
         }
 
-        # Sheet marker, flagging when no header row was detected.
+        # Sheet marker, flagging when the sheet is treated as having no header.
         marker <- if (has_header) {
           paste0("[Sheet: ", sheet, "]")
         } else {
-          paste0("[Sheet: ", sheet, " (no header row detected)]")
+          paste0("[Sheet: ", sheet, " (no header row)]")
         }
         contents <- c(contents, marker)
 
@@ -113,7 +113,9 @@ XlsxFileComparator <- R6::R6Class(
             # Column=Value keeps the column name next to each cell so a
             # changed cell shows which column it belongs to.
             cells <- paste0(headers, "=", values)
-            paste0(prefix, "row ", i, "\t", paste(cells, collapse = "\t"))
+            # " | " keeps the spacing between columns consistent regardless of
+            # cell content length (unlike a tab character).
+            paste0(prefix, "row ", i, " | ", paste(cells, collapse = " | "))
           }, character(1))
 
           contents <- c(contents, rows)
@@ -139,34 +141,6 @@ XlsxFileComparator <- R6::R6Class(
         return("Xlsx details comparison disabled.")
       }
       super$vrf_details_supported(config)
-    }
-  ),
-  private = list(
-
-    # Heuristic for deciding whether the first row of a sheet is a header row.
-    #
-    # The check is intentionally conservative to avoid mislabelling real data:
-    # a header is assumed (matching the usual Excel convention and readxl's
-    # default) UNLESS the first row looks like data, i.e. every non-empty cell
-    # in the first row parses as a number. In that case the sheet is treated as
-    # having no header row.
-    has_header_row = function(raw) {
-      if (is.null(raw) || nrow(raw) < 1 || ncol(raw) < 1) {
-        return(TRUE)
-      }
-
-      header    <- as.character(unlist(raw[1, ]))
-      non_empty <- header[!is.na(header) & header != ""]
-
-      # An empty first row cannot be a header.
-      if (length(non_empty) == 0) {
-        return(FALSE)
-      }
-
-      # If every non-empty first-row cell is numeric, the row looks like data
-      # rather than a header.
-      all_numeric <- all(!is.na(suppressWarnings(as.numeric(non_empty))))
-      !all_numeric
     }
   )
 )
