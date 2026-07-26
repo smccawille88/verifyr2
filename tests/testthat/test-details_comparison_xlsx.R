@@ -116,42 +116,30 @@ test_that(paste(
 })
 
 test_that(paste(
-  "A sheet with a header row is not flagged as headerless"
+  "The default header handling treats the first row as a header"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
 
   comparator <- create_comparator(file1, file1)
   contents   <- comparator$vrf_contents(file1, config, omit = NULL)[[1]]
 
-  expect_false(any(grepl("no header row detected", contents)))
+  expect_false(any(grepl("no header row", contents)))
 })
 
 test_that(paste(
-  "A sheet whose first row is numeric is detected as headerless"
-), {
-  file1 <- testthat::test_path(base, "no_header.xlsx")
-  skip_if(!file.exists(file1), "headerless fixture not available")
-
-  comparator <- create_comparator(file1, file1)
-  contents   <- comparator$vrf_contents(file1, config, omit = NULL)[[1]]
-
-  expect_true(any(grepl("no header row detected", contents)))
-})
-
-test_that(paste(
-  "xlsx.header config overrides the header-row detection"
+  "xlsx.header = 'no' treats every row as data (positional columns)"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
 
-  # force no header
   cfg_no <- Config$new(FALSE)
   cfg_no$set("xlsx.header", "no")
   ct_no  <- create_comparator(file1, file1)$vrf_contents(file1, cfg_no, NULL)[[1]]
-  expect_true(any(grepl("no header row detected", ct_no)))
+  expect_true(any(grepl("no header row", ct_no)))
+  expect_true(any(grepl("Column1=", ct_no)))
 
-  # force header
   cfg_yes <- Config$new(FALSE)
   cfg_yes$set("xlsx.header", "yes")
-  ct_yes  <- create_comparator(file1, file1)$vrf_contents(file1, cfg_yes, NULL)[[1]]
-  expect_false(any(grepl("no header row detected", ct_yes)))
+  ct_yes  <-
+    create_comparator(file1, file1)$vrf_contents(file1, cfg_yes, NULL)[[1]]
+  expect_false(any(grepl("no header row", ct_yes)))
 })
