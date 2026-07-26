@@ -111,8 +111,6 @@ test_that(paste(
 test_that(paste(
   "Old .xls files are handled by the XlsxFileComparator"
 ), {
-  skip_if_not_installed("readxl")
-
   file1 <- readxl::readxl_example("clippy.xls")
 
   comparator <- create_comparator(file1, file1)
