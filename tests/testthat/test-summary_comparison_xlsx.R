@@ -79,8 +79,9 @@ test_that(paste(
 ################################################################################
 
 test_that(paste(
-  "Appends 'Xlsx details comparison disabled.' to the summary",
-  "when the readxl library is not available"
+  "Returns 'Different file sizes for compared files.",
+  "Xlsx details comparison disabled.' when readxl library",
+  "is not available"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
   file2 <- testthat::test_path(base, "addition_one_row.xlsx")
@@ -97,11 +98,12 @@ test_that(paste(
   comparator <- create_comparator(file1, file2)
   result     <- comparator$vrf_summary(config = config_local, omit = omit)
 
-  # When readxl is unavailable the comparator falls back to comparing the raw
-  # xlsx bytes as text. The exact summary prefix of that fallback is platform
-  # dependent (xlsx files are binary), so only the stable, meaningful part is
-  # asserted: that detailed comparison is reported as disabled.
-  expect_match(result, "Xlsx details comparison disabled.", fixed = TRUE)
+  # With readxl unavailable the comparison falls back to a deterministic
+  # binary (byte-level) comparison rather than a platform-dependent text diff.
+  expect_equal(result, paste(
+    "Different file sizes for compared files.",
+    "Xlsx details comparison disabled."
+  ))
 })
 
 ################################################################################
