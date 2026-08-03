@@ -197,6 +197,21 @@ TxtFileComparator <- R6::R6Class(
     #'
     vrf_details_supported = function(config) {
       return("")
+    },
+
+    #' @description
+    #' Helper for performing a binary (byte-level) summary comparison. This
+    #' delegates to the BinaryFileComparator summary logic and is used by
+    #' specialised comparators as a deterministic, platform-independent fallback
+    #' when their detailed (text-based) comparison is disabled. This method is
+    #' intended to be called only by the comparator classes in the processing
+    #' and shouldn't be called directly by the user.
+    #'
+    #' @param config configuration values
+    #' @param omit   string pattern to omit from the comparison
+    #'
+    vrf_binary_summary_inner = function(config, omit) {
+      super$vrf_summary_inner(config, omit)
     }
   )
 )
