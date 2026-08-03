@@ -143,7 +143,8 @@ test_that(paste(
 
   cfg_no <- Config$new(FALSE)
   cfg_no$set("xlsx.header", "no")
-  ct_no  <- create_comparator(file1, file1)$vrf_contents(file1, cfg_no, NULL)[[1]]
+  ct_no  <-
+    create_comparator(file1, file1)$vrf_contents(file1, cfg_no, NULL)[[1]]
   expect_true(any(grepl("no header row", ct_no)))
   expect_true(any(grepl("Column1=", ct_no)))
 
