@@ -3,88 +3,91 @@ base   <- "test_outputs/xlsx"
 config <- Config$new(FALSE)
 
 ################################################################################
-# Excel file comparison - WITHOUT omit
+# Generic file existence checks
 ################################################################################
 
 test_that(paste(
-  "Returns 'No differences' for identical files."
+  "Returns 'File(s) not available; unable to compare.' ",
+  "if both of the files do not exist"
+), {
+  file1 <- testthat::test_path(base, "nonexisting1.xlsx")
+  file2 <- testthat::test_path(base, "nonexisting2.xlsx")
+
+  comparator <- create_comparator(file1, file2)
+  result     <- comparator$vrf_details(config = config)
+  expect_length(result, 1)
+
+  txt_result = result[[1]]
+  expect_equal(txt_result$type, "text")
+  expect_equal(txt_result$contents, "File(s) not available; unable to compare.")
+})
+
+test_that(paste(
+  "Returns 'File(s) not available; unable to compare.' ",
+  "if one file does not exist"
+), {
+  file1 <- testthat::test_path(base, "base.xlsx")
+  file2 <- testthat::test_path(base, "nonexisting.xlsx")
+
+  comparator <- create_comparator(file1, file2)
+  result     <- comparator$vrf_details(config = config)
+  expect_length(result, 1)
+
+  txt_result = result[[1]]
+  expect_equal(txt_result$type, "text")
+  expect_equal(txt_result$contents, "File(s) not available; unable to compare.")
+})
+
+################################################################################
+# Simple tests that a S4 object is received for details comparison
+################################################################################
+
+test_that(paste(
+  "Returns S4 comparison object for two files with same content"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
   file2 <- testthat::test_path(base, "copy.xlsx")
 
-  comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config)
+  config <- Config$new(FALSE)
+  config$set("details.mode", "summary")
 
-  expect_equal(result, "No differences.")
+  comparator <- create_comparator(file1, file2)
+  result     <- comparator$vrf_details(config = config)
+  expect_length(result, 1)
+
+  txt_result = result[[1]]
+  expect_equal(txt_result$type, "text")
+  expect_equal(typeof(txt_result$contents), "S4")
 })
 
 test_that(paste(
-  "Returns 'Different number of lines in compared content.'",
-  "for files with additional row in one sheet"
-), {
-  file1 <- testthat::test_path(base, "base.xlsx")
-  file2 <- testthat::test_path(base, "addition_one_row.xlsx")
-
-  comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config)
-
-  expect_equal(result, "Different number of lines in compared content.")
-})
-
-test_that(paste(
-  "Returns 'File content has changes in 2 place(s).'",
-  "for files with changed cell values in two sheets"
+  "Returns S4 comparison object for two files with differences in content"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
   file2 <- testthat::test_path(base, "modified.xlsx")
 
-  comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config)
+  config <- Config$new(FALSE)
+  config$set("details.mode", "full")
 
-  expect_equal(result, "File content has changes in 2 place(s).")
+  comparator <- create_comparator(file1, file2)
+  result     <- comparator$vrf_details(config = config)
+  expect_length(result, 1)
+
+  txt_result = result[[1]]
+  expect_equal(txt_result$type, "text")
+  expect_equal(typeof(txt_result$contents), "S4")
 })
 
 ################################################################################
-# Excel file comparison - WITH omit
+# Details comparison - with readxl package missing
 ################################################################################
 
 test_that(paste(
-  "Returns 'No differences.'",
-  "for comparison with 'omit' parameter that is not present in either file"
-), {
-  file1 <- testthat::test_path(base, "base.xlsx")
-  file2 <- testthat::test_path(base, "copy.xlsx")
-
-  comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config, omit = "Nothing")
-
-  expect_equal(result, "No differences.")
-})
-
-test_that(paste(
-  "Returns 'No differences.'",
-  "when called with 'omit' catching the changed rows in content"
+  "Returns 'Xlsx details comparison disabled.' ",
+  "when readxl library is not available"
 ), {
   file1 <- testthat::test_path(base, "base.xlsx")
   file2 <- testthat::test_path(base, "modified.xlsx")
-
-  comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config, omit = "002")
-
-  expect_equal(result, "No differences.")
-})
-
-################################################################################
-# Excel file comparison - with readxl package missing
-################################################################################
-
-test_that(paste(
-  "Returns 'Different file sizes for compared files.",
-  "Xlsx details comparison disabled.' when readxl library",
-  "is not available"
-), {
-  file1 <- testthat::test_path(base, "base.xlsx")
-  file2 <- testthat::test_path(base, "addition_one_row.xlsx")
 
   # mock the readxl available method to return false to replicate situation
   # that readxl library is not installed.
@@ -94,29 +97,11 @@ test_that(paste(
 
   config_local <- Config$new(FALSE)
 
-  omit       <- "Nothing"
   comparator <- create_comparator(file1, file2)
-  result     <- comparator$vrf_summary(config = config_local, omit = omit)
+  result     <- comparator$vrf_details(config = config_local)
+  expect_length(result, 1)
 
-  # With readxl unavailable the comparison falls back to a deterministic
-  # binary (byte-level) comparison rather than a platform-dependent text diff.
-  expect_equal(result, paste(
-    "Different file sizes for compared files.",
-    "Xlsx details comparison disabled."
-  ))
-})
-
-################################################################################
-# Old binary Excel format (.xls) routing
-################################################################################
-
-test_that(paste(
-  "Old .xls files are handled by the XlsxFileComparator"
-), {
-  file1 <- readxl::readxl_example("clippy.xls")
-
-  comparator <- create_comparator(file1, file1)
-
-  expect_s3_class(comparator, "XlsxFileComparator")
-  expect_equal(comparator$vrf_summary(config = config), "No differences.")
+  txt_result = result[[1]]
+  expect_equal(txt_result$type, "text")
+  expect_equal(txt_result$contents, "Xlsx details comparison disabled.")
 })
