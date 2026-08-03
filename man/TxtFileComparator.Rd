@@ -40,6 +40,7 @@ comparator <- TxtFileComparator$new(file1, file2)
 \item \href{#method-TxtFileComparator-vrf_details_inner}{\code{TxtFileComparator$vrf_details_inner()}}
 \item \href{#method-TxtFileComparator-vrf_contents_inner}{\code{TxtFileComparator$vrf_contents_inner()}}
 \item \href{#method-TxtFileComparator-vrf_details_supported}{\code{TxtFileComparator$vrf_details_supported()}}
+\item \href{#method-TxtFileComparator-vrf_binary_summary_inner}{\code{TxtFileComparator$vrf_binary_summary_inner()}}
 \item \href{#method-TxtFileComparator-clone}{\code{TxtFileComparator$clone()}}
 }
 }
@@ -145,6 +146,30 @@ summary string.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{config}}{configuration values}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TxtFileComparator-vrf_binary_summary_inner"></a>}}
+\if{latex}{\out{\hypertarget{method-TxtFileComparator-vrf_binary_summary_inner}{}}}
+\subsection{Method \code{vrf_binary_summary_inner()}}{
+Helper for performing a binary (byte-level) summary comparison. This
+delegates to the BinaryFileComparator summary logic and is used by
+specialised comparators as a deterministic, platform-independent fallback
+when their detailed (text-based) comparison is disabled. This method is
+intended to be called only by the comparator classes in the processing
+and shouldn't be called directly by the user.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TxtFileComparator$vrf_binary_summary_inner(config, omit)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{configuration values}
+
+\item{\code{omit}}{string pattern to omit from the comparison}
 }
 \if{html}{\out{</div>}}
 }
