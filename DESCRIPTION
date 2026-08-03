@@ -51,7 +51,6 @@ Collate:
     'PdfFileComparator.R'
     'TxtWithImagesComparator.R'
     'RtfFileComparator.R'
-    'XlsxFileComparator.R'
     'list_files.R'
     'list_folder_files.R'
     'run_example.R'
