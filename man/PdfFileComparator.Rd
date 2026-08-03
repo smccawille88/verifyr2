@@ -37,6 +37,7 @@ comparator <- PdfFileComparator$new(file1, file2)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-PdfFileComparator-vrf_contents}{\code{PdfFileComparator$vrf_contents()}}
+\item \href{#method-PdfFileComparator-vrf_summary_inner}{\code{PdfFileComparator$vrf_summary_inner()}}
 \item \href{#method-PdfFileComparator-vrf_details_supported}{\code{PdfFileComparator$vrf_details_supported()}}
 \item \href{#method-PdfFileComparator-clone}{\code{PdfFileComparator$clone()}}
 }
@@ -52,9 +53,9 @@ comparator <- PdfFileComparator$new(file1, file2)
 <li><span class="pkg-link" data-pkg="verifyr2" data-topic="FileComparator" data-id="vrf_open_debug"><a href='../../verifyr2/html/FileComparator.html#method-FileComparator-vrf_open_debug'><code>verifyr2::FileComparator$vrf_open_debug()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="verifyr2" data-topic="FileComparator" data-id="vrf_option_value"><a href='../../verifyr2/html/FileComparator.html#method-FileComparator-vrf_option_value'><code>verifyr2::FileComparator$vrf_option_value()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="verifyr2" data-topic="FileComparator" data-id="vrf_summary"><a href='../../verifyr2/html/FileComparator.html#method-FileComparator-vrf_summary'><code>verifyr2::FileComparator$vrf_summary()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="verifyr2" data-topic="TxtFileComparator" data-id="vrf_binary_summary_inner"><a href='../../verifyr2/html/TxtFileComparator.html#method-TxtFileComparator-vrf_binary_summary_inner'><code>verifyr2::TxtFileComparator$vrf_binary_summary_inner()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="verifyr2" data-topic="TxtFileComparator" data-id="vrf_contents_inner"><a href='../../verifyr2/html/TxtFileComparator.html#method-TxtFileComparator-vrf_contents_inner'><code>verifyr2::TxtFileComparator$vrf_contents_inner()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="verifyr2" data-topic="TxtFileComparator" data-id="vrf_details_inner"><a href='../../verifyr2/html/TxtFileComparator.html#method-TxtFileComparator-vrf_details_inner'><code>verifyr2::TxtFileComparator$vrf_details_inner()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="verifyr2" data-topic="TxtFileComparator" data-id="vrf_summary_inner"><a href='../../verifyr2/html/TxtFileComparator.html#method-TxtFileComparator-vrf_summary_inner'><code>verifyr2::TxtFileComparator$vrf_summary_inner()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -78,6 +79,31 @@ and shouldn't be called directly by the user.
 \describe{
 \item{\code{file}}{file for which to get the contents}
 
+\item{\code{config}}{configuration values}
+
+\item{\code{omit}}{string pattern to omit from the comparison}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PdfFileComparator-vrf_summary_inner"></a>}}
+\if{latex}{\out{\hypertarget{method-PdfFileComparator-vrf_summary_inner}{}}}
+\subsection{Method \code{vrf_summary_inner()}}{
+Method for comparing the file contents on the summary level. When the
+detailed (pdftools-based) comparison is disabled, a text-based diff of
+the raw pdf bytes would give platform-dependent results, so a
+deterministic binary (byte-level) comparison is used instead. Otherwise
+the normal text-based summary comparison is used. This method is intended
+to be called only by the comparator classes in the processing and
+shouldn't be called directly by the user.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PdfFileComparator$vrf_summary_inner(config, omit)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
 \item{\code{config}}{configuration values}
 
 \item{\code{omit}}{string pattern to omit from the comparison}
