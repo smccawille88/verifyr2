@@ -79,7 +79,7 @@ test_that(paste(
 ################################################################################
 
 test_that(paste(
-  "Returns 'Different number of lines in compared content.",
+  "Returns 'Different file sizes for compared files.",
   "Xlsx details comparison disabled.' when readxl library",
   "is not available"
 ), {
@@ -98,8 +98,10 @@ test_that(paste(
   comparator <- create_comparator(file1, file2)
   result     <- comparator$vrf_summary(config = config_local, omit = omit)
 
+  # With readxl unavailable the comparison falls back to a deterministic
+  # binary (byte-level) comparison rather than a platform-dependent text diff.
   expect_equal(result, paste(
-    "Different number of lines in compared content.",
+    "Different file sizes for compared files.",
     "Xlsx details comparison disabled."
   ))
 })

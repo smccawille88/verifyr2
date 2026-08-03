@@ -64,6 +64,25 @@ PdfFileComparator <- R6::R6Class(
     },
 
     #' @description
+    #' Method for comparing the file contents on the summary level. When the
+    #' detailed (pdftools-based) comparison is disabled, a text-based diff of
+    #' the raw pdf bytes would give platform-dependent results, so a
+    #' deterministic binary (byte-level) comparison is used instead. Otherwise
+    #' the normal text-based summary comparison is used. This method is intended
+    #' to be called only by the comparator classes in the processing and
+    #' shouldn't be called directly by the user.
+    #'
+    #' @param config configuration values
+    #' @param omit   string pattern to omit from the comparison
+    #'
+    vrf_summary_inner = function(config, omit) {
+      if ("no" == super$vrf_option_value(config, "pdf.details")) {
+        return(self$vrf_binary_summary_inner(config, omit))
+      }
+      super$vrf_summary_inner(config, omit)
+    },
+
+    #' @description
     #' Inherited method for indicating whether detailed comparison is available
     #' with the current comparator. Returns an empty string if the comparator is
     #' is supported, otherwise a string that will be concatenated with the
